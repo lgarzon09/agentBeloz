@@ -1,12 +1,20 @@
 # Beloz Agents Demo
 
-A single-page web application that demos two AI agents built for Beloz, a Mexican fintech credit-line company. The agents are deployed in n8n and exposed as webhook endpoints. This app provides a clean, branded interface for interacting with both agents live.
+Interview deliverable for the **Strategy and Ops Lead** position at Beloz. This is a single-page web app where the interviewer can interact live with two AI agents that operationalize the proposed go-to-market strategy.
+
+The app is deployed on **Vercel**. Both agents were built rapidly in **n8n** as proof-of-concept workflows, exposed as webhook endpoints that this frontend calls directly.
 
 ## Agents
 
-**Fito (Case 1):** Post-recharge upsell agent. Detects when a customer completes a recharge or bill payment and generates a personalized BNPL offer in conversational Mexican Spanish.
+**Fito (Case 1):** Post-recharge upsell agent. When a Beloz customer completes a recharge or bill payment, this agent generates a personalized "Pay with your line" (BNPL) offer in conversational Mexican Spanish. The n8n workflow enriches the payment event with the user's profile, runs eligibility rules, and produces the message.
 
-**Discovery Interviewer (Case 2):** Adaptive interview agent that conducts product discovery conversations with micro-business owners to validate segments for a new product.
+**Discovery Interviewer (Case 2):** Adaptive discovery interview agent. Conducts product research conversations with users identified as micro-business owners. Asks one question at a time, adapts based on the answer, and closes after gathering enough signal to validate segments for the new "Beloz Business" product.
+
+## Tech stack
+
+- **Frontend:** Next.js 15 (App Router), TypeScript, Tailwind CSS v4, shadcn/ui
+- **Agents:** n8n workflows exposed as POST webhooks
+- **Deployment:** Vercel (zero-config)
 
 ## Run locally
 
@@ -19,13 +27,11 @@ Open [http://localhost:3000](http://localhost:3000). Both agents work in demo mo
 
 ## Configure webhooks
 
-Copy the env template and fill in your n8n webhook URLs:
-
 ```bash
 cp .env.local.example .env.local
 ```
 
-Edit `.env.local`:
+Fill in the n8n webhook URLs:
 
 ```
 NEXT_PUBLIC_FITO_WEBHOOK_URL=https://your-n8n-instance.com/webhook/xxxxx
@@ -38,6 +44,7 @@ NEXT_PUBLIC_INTERVIEWER_WEBHOOK_URL=https://your-n8n-instance.com/webhook/yyyyy
 
 ```json
 {
+  "sessionId": "uuid",
   "user_id": "demo-user",
   "name": "Maria",
   "type": "airtime",
@@ -51,12 +58,11 @@ NEXT_PUBLIC_INTERVIEWER_WEBHOOK_URL=https://your-n8n-instance.com/webhook/yyyyy
 }
 ```
 
-Expected response: JSON with a `message`, `text`, or `output` string field.
-
 ### Discovery Interviewer (POST)
 
 ```json
 {
+  "sessionId": "uuid",
   "user_id": "demo-interview",
   "name": "Carlos",
   "inferred_segment": "urban_corner_store",
@@ -65,19 +71,4 @@ Expected response: JSON with a `message`, `text`, or `output` string field.
 }
 ```
 
-Expected response: JSON with a `message`, `text`, or `output` string field.
-
-## Deploy to Vercel
-
-1. Push this repo to GitHub
-2. Import the repo in [Vercel](https://vercel.com)
-3. Add the two `NEXT_PUBLIC_*` environment variables in the Vercel dashboard
-4. Deploy (zero config, default settings work)
-
-## Tech stack
-
-- Next.js 15 (App Router)
-- TypeScript
-- Tailwind CSS v4
-- shadcn/ui
-# agentBeloz
+Both webhooks should return JSON with a `message`, `text`, or `output` string field.
